@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+	    <!-- 1. Tokens & Base -->
+    <link rel="stylesheet" href="css/01-tokens.css">
+    <link rel="stylesheet" href="css/02-base.css">
+    
+    <!-- 2. Layout & UI -->
+    <link rel="stylesheet" href="css/03-layout.css">
+    <link rel="stylesheet" href="css/04-controls.css">
+    <link rel="stylesheet" href="css/05-forms.css">
+    <link rel="stylesheet" href="css/06-components.css">
+    <link rel="stylesheet" href="css/07-lists.css">
+    
+    <!-- 3. Resume & Animation -->
+    <link rel="stylesheet" href="css/08-resume.css">
+    <link rel="stylesheet" href="css/09-animations.css">
+    <link rel="stylesheet" href="css/10-responsive.css">
+    
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ResumeFlow | Professional Resume Builder</title>
+    <meta name="description"
+        content="Create stunning professional resumes with our modern drag & drop Resume Builder. Features real-time preview, dark mode, PDF export, and more.">
+    <meta name="keywords" content="resume builder, CV creator, professional resume, PDF resume">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+
+<body class="mode-edit">
+
+    <!-- ============================================
+         HEADER / APP BAR
+         ============================================ -->
+    <header class="header" role="banner">
+        <!-- Logo -->
+        <div class="brand" aria-label="ResumeFlow">
+            <i class="fa-solid fa-file-signature"></i>
+            <span class="brand-text">ResumeFlow</span>
+        </div>
+
+        <!-- Mobile View Toggle -->
+        <div class="view-switch" role="tablist" aria-label="View Mode">
+            <button class="view-btn active" role="tab" aria-selected="true" data-view="edit" title="Editor">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Editor</span>
+            </button>
+            <button class="view-btn" role="tab" aria-selected="false" data-view="preview" title="Preview">
+                <i class="fa-solid fa-eye"></i>
+                <span>Preview</span>
+            </button>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <!-- Import -->
+            <button class="icon-btn" id="btn-import" title="Import Resume">
+                <i class="fa-solid fa-upload"></i>
+            </button>
+            <input type="file" id="file-input" accept=".json" hidden>
+
+            <!-- Export -->
+            <button class="icon-btn" id="btn-export" title="Export Resume">
+                <i class="fa-solid fa-download"></i>
+            </button>
+
+            <!-- Color Picker -->
+            <div class="icon-btn color-picker-wrap" title="Accent Color">
+                <i class="fa-solid fa-palette"></i>
+                <input type="color" id="color-picker" value="#6366f1">
+                <div class="color-dot"></div>
+            </div>
+
+            <!-- Dark Mode -->
+            <button class="icon-btn" id="btn-theme" title="Toggle Dark Mode">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+
+            <!-- Print / PDF -->
+            <button class="icon-btn primary" id="btn-print" title="Save as PDF">
+                <i class="fa-solid fa-print"></i>
+            </button>	
+        </div>
+    </header>
+
+    <!-- ============================================
+         MAIN WORKSPACE
+         ============================================ -->
+    <div class="workspace">
+
+        <!-- ================================
+             LEFT: EDITOR PANEL
+             ================================ -->
+        <aside class="editor" role="form" aria-label="Resume Editor">
+
+            <!-- Identity Section -->
+            <section class="card">
+                <h2 class="card-header">
+                    <i class="fa-solid fa-id-card"></i>
+                    Personal Information
+                </h2>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="in-name" placeholder="Full Name" autocomplete="name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-briefcase"></i>
+                        <input type="text" id="in-role" placeholder="Job Title / Role">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="in-email" placeholder="Email Address" autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="tel" id="in-phone" placeholder="Phone Number" autocomplete="tel">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-map-pin"></i>
+                        <input type="text" id="in-location" placeholder="City, Country">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fa-brands fa-linkedin"></i>
+                            <input type="text" id="in-linkedin" placeholder="LinkedIn URL">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-globe"></i>
+                            <input type="text" id="in-website" placeholder="Portfolio Website">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Summary Section -->
+            <section class="card">
+                <h2 class="card-header">
+                    <i class="fa-solid fa-align-left"></i>
+                    Professional Summary
+                </h2>
+
+                <div class="form-group">
+                    <div class="input-wrapper textarea-wrap">
+                        <i class="fa-solid fa-quote-left"></i>
+                        <textarea id="in-summary" placeholder="Write a compelling 2-3 sentence summary..."
+                            rows="4"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Experience Section -->
+            <section class="card">
+                <h2 class="card-header">
+                    <i class="fa-solid fa-briefcase"></i>
+                    Work Experience
+                    <label class="toggle-switch" title="Toggle Visibility">
+                        <input type="checkbox" id="toggle-exp" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </h2>
+
+                <div id="list-exp" class="items-list" data-type="exp">
+                    <!-- Dynamic items -->
+                </div>
+
+                <button class="btn-add" data-type="exp">
+                    <i class="fa-solid fa-plus"></i>
+                    Add Experience
+                </button>
+            </section>
+
+            <!-- Projects Section -->
+            <section class="card">
+                <h2 class="card-header">
+                    <i class="fa-solid fa-rocket"></i>
+                    Projects
+                    <label class="toggle-switch" title="Toggle Visibility">
+                        <input type="checkbox" id="toggle-proj" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </h2>
+
+                <div id="list-proj" class="items-list" data-type="proj">
+                    <!-- Dynamic items -->
+                </div>
+
+                <button class="btn-add" data-type="proj">
+                    <i class="fa-solid fa-plus"></i>
+                    Add Project
+                </button>
+            </section>
+
+            <!-- Education Section -->
+            <section class="card">
+                <h2 class="card-header">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    Education
+                    <label class="toggle-switch" title="Toggle Visibility">
+                        <input type="checkbox" id="toggle-edu" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </h2>
+
+                <div id="list-edu" class="items-list" data-type="edu">
+                    <!-- Dynamic items -->
+                </div>
+
+                <button class="btn-add" data-type="edu">
+                    <i class="fa-solid fa-plus"></i>
+                    Add Education
+                </button>
+            </section>
+
+            <!-- Skills Section -->
+            <section class="card">
+                <h2 class="card-header">
+                    <i class="fa-solid fa-microchip"></i>
+                    Skills & Expertise
+                </h2>
+
+                <div class="form-group">
+                    <label class="input-label">Technical Skills</label>
+                    <div class="input-wrapper textarea-wrap">
+                        <i class="fa-solid fa-code"></i>
+                        <textarea id="in-skills-tech" placeholder="JavaScript, Python, React, Node.js..."
+                            rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="input-label">Soft Skills</label>
+                    <div class="input-wrapper textarea-wrap">
+                        <i class="fa-solid fa-users"></i>
+                        <textarea id="in-skills-soft" placeholder="Leadership, Communication, Problem Solving..."
+                            rows="2"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Additional Section -->
+            <section class="card">
+                <h2 class="card-header">
+                    <i class="fa-solid fa-circle-plus"></i>
+                    Additional
+                </h2>
+
+                <div class="form-group">
+                    <label class="input-label">Languages</label>
+                    <div class="input-wrapper textarea-wrap">
+                        <i class="fa-solid fa-language"></i>
+                        <textarea id="in-languages" placeholder="English (Native), Spanish (Fluent)..."
+                            rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="input-label">Hobbies & Interests</label>
+                    <div class="input-wrapper textarea-wrap">
+                        <i class="fa-solid fa-heart"></i>
+                        <textarea id="in-hobbies" placeholder="Photography, Hiking, Open Source..." rows="2"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Spacer -->
+            <div class="spacer"></div>
+        </aside>
+
+        <!-- ================================
+             RIGHT: PREVIEW PANEL
+             ================================ -->
+        <main class="preview" role="document" aria-label="Resume Preview">
+            <div id="resume-paper" class="resume-paper">
+
+                <!-- Resume Header -->
+                <header class="resume-header">
+                    <h1 class="resume-name" id="out-name">Your Name</h1>
+                    <p class="resume-role" id="out-role">Your Professional Title</p>
+
+                    <div class="resume-contact">
+                        <span class="contact-item" id="wrap-email">
+                            <i class="fa-solid fa-envelope"></i>
+                            <span id="out-email"></span>
+                        </span>
+                        <span class="contact-item" id="wrap-phone">
+                            <i class="fa-solid fa-phone"></i>
+                            <span id="out-phone"></span>
+                        </span>
+                        <span class="contact-item" id="wrap-location">
+                            <i class="fa-solid fa-map-marker-alt"></i>
+                            <span id="out-location"></span>
+                        </span>
+                        <span class="contact-item" id="wrap-linkedin">
+                            <i class="fa-brands fa-linkedin"></i>
+                            <span id="out-linkedin"></span>
+                        </span>
+                        <span class="contact-item" id="wrap-website">
+                            <i class="fa-solid fa-globe"></i>
+                            <span id="out-website"></span>
+                        </span>
+                    </div>
+                </header>
+
+                <!-- Profile Section -->
+                <section class="resume-section">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-user"></i>
+                        Profile
+                    </h2>
+                    <p class="section-text" id="out-summary"></p>
+                </section>
+
+                <!-- Skills Section -->
+                <section class="resume-section">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-sliders"></i>
+                        Skills
+                    </h2>
+                    <div class="skills-group">
+                        <span class="skills-label">Technical:</span>
+                        <div class="skills-pills" id="out-skills-tech"></div>
+                    </div>
+                    <div class="skills-group">
+                        <span class="skills-label">Professional:</span>
+                        <div class="skills-pills" id="out-skills-soft"></div>
+                    </div>
+                </section>
+
+                <!-- Experience Section -->
+                <section class="resume-section" id="section-exp">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-briefcase"></i>
+                        Experience
+                    </h2>
+                    <div id="out-exp" class="entries-container"></div>
+                </section>
+
+                <!-- Projects Section -->
+                <section class="resume-section" id="section-proj">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        Projects
+                    </h2>
+                    <div id="out-proj" class="entries-container"></div>
+                </section>
+
+                <!-- Education Section -->
+                <section class="resume-section" id="section-edu">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        Education
+                    </h2>
+                    <div id="out-edu" class="entries-container"></div>
+                </section>
+
+                <!-- Additional Section -->
+                <section class="resume-section">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-plus"></i>
+                        Additional
+                    </h2>
+                    <div class="skills-group">
+                        <span class="skills-label">Languages:</span>
+                        <div class="skills-pills" id="out-languages"></div>
+                    </div>
+                    <div class="skills-group">
+                        <span class="skills-label">Interests:</span>
+                        <div class="skills-pills" id="out-hobbies"></div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <!-- ============================================
+       2. JS MODULES (Execution Order Matters)
+    ============================================= -->
+    <script src="js/01-config.js"></script>
+    <script src="js/02-utils.js"></script>
+    <script src="js/03-templates.js"></script>
+    <script src="js/04-store.js"></script>
+    <script src="js/05-app-core.js"></script>
+    <script src="js/06-app-render.js"></script>
+    <script src="js/07-app-handlers.js"></script>
+    <script src="js/08-app-drag.js"></script>
+    <script src="js/09-app-io.js"></script>
+    <script src="js/10-bootstrap.js"></script>
+</body>
+
+</html>

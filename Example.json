@@ -1,0 +1,85 @@
+{
+  "settings": {
+    "theme": "dark",
+    "accentColor": "#10b981"
+  },
+  "visibility": {
+    "exp": true,
+    "proj": true,
+    "edu": true
+  },
+  "personal": {
+    "name": "Alex Morgan",
+    "role": "Senior UX/UI Designer",
+    "email": "alex.morgan@example.com",
+    "phone": "+1 (555) 123-4567",
+    "location": "San Francisco, CA",
+    "linkedin": "linkedin.com/in/alexmorgan-demo",
+    "website": "https://alexmorgan.design"
+  },
+  "summary": "Innovative Senior UX/UI Designer with 6+ years of experience crafting user-centered digital products. specialized in mobile app interfaces and accessible web design. Proven track record of improving user retention by 25% through intuitive design systems. Adept at bridging the gap between design and engineering teams.",
+  "skills": {
+    "tech": "Figma, Adobe XD, Sketch, Principle, HTML5, CSS3, React Basics",
+    "soft": "User Research, Wireframing, Prototyping, Design Systems, Agile Methodology, Mentorship"
+  },
+  "additional": {
+    "languages": "English (Native), Spanish (Conversational)",
+    "hobbies": "Urban sketching, hiking, playing guitar, sci-fi novels"
+  },
+  "exp": [
+    {
+      "id": "1",
+      "title": "Lead Product Designer",
+      "sub": "Creative Pulse Agency",
+      "subtitle": "Digital Product Studio",
+      "date": "Jan 2021 - Present",
+      "description": "• Spearheaded the redesign of a major fintech app, resulting in a 40% increase in daily active users.\n• Managed a team of 4 junior designers, conducting weekly critiques and mentorship sessions.\n• Established a unified design system used across 12 different internal products."
+    },
+    {
+      "id": "2",
+      "title": "UI Designer",
+      "sub": "Nebula Tech Solutions",
+      "subtitle": "Enterprise Software Firm",
+      "date": "Jun 2018 - Dec 2020",
+      "description": "• Collaborated with developers to implement responsive web designs for enterprise clients.\n• Conducted A/B testing on landing pages, improving conversion rates by 15%.\n• Created high-fidelity prototypes for client presentations and stakeholder buy-in."
+    }
+  ],
+  "proj": [
+    {
+      "id": "3",
+      "title": "EcoTrack Mobile App",
+      "sub": "Personal Project",
+      "subtitle": "iOS & Android Application",
+      "date": "2023",
+      "description": "• Designed a gamified sustainability app that helps users track their carbon footprint.\n• Conducted user interviews with 20+ participants to define core features."
+    },
+    {
+      "id": "4",
+      "title": "Restaurant POS System",
+      "sub": "Freelance Client",
+      "subtitle": "SaaS Platform Design",
+      "date": "2022",
+      "description": "• Redesigned the interface for a tablet-based Point of Sale system to reduce server error rates.\n• Simplified the checkout flow, reducing transaction time by an average of 15 seconds."
+    }
+  ],
+  "edu": [
+    {
+      "id": "5",
+      "title": "Bachelor of Fine Arts in Interaction Design",
+      "sub": "California College of the Arts",
+      "subtitle": "CCA, San Francisco",
+      "date": "2018",
+      "description": "Graduated with Honors. Senior Thesis: 'The Future of Haptic Feedback in Mobile Interfaces'."
+    },
+    {
+      "id": "6",
+      "title": "Certification in User Experience Design",
+      "sub": "General Assembly",
+      "subtitle": "UX Immersive Bootcamp",
+      "date": "2019",
+      "description": "Intensive 10-week boot camp focused on UX research methodologies and information architecture."
+    }
+  ]
+}
+
+
