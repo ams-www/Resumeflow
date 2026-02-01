@@ -1,0 +1,131 @@
+/* =============================================================================
+   3. LAYOUT STRUCTURE (Upgraded)
+   ============================================================================= */
+
+/* ─── Header ─── */
+.header {
+    height: var(--header-h);
+    /* Modern Glassmorphism - The "Apple" Formula */
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    
+    /* Replaced solid border with subtle shadow/inset for depth */
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
+    border-bottom: none;
+    
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    transition: background-color var(--dur-norm), box-shadow var(--dur-norm);
+}
+
+[data-theme="dark"] .header {
+    background: rgba(30, 41, 59, 0.72);
+    box-shadow: inset 0 -1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Workspace ─── */
+.workspace {
+    display: flex;
+    height: 100vh; /* Fallback */
+    height: 100dvh; 
+    overflow: hidden;
+    position: relative;
+    padding-top: 0;
+}
+
+/* ─── Editor Panel ─── */
+.editor {
+    width: 450px; 
+    min-width: 340px;
+    background: var(--color-bg-panel);
+    
+    /* Cleaner separation than standard border */
+    box-shadow: 1px 0 0 0 var(--color-border);
+    border-right: none;
+    
+    /* Fix: 'overlay' is deprecated. Use auto + gutter */
+    overflow-y: auto;
+    scrollbar-gutter: stable; 
+    overflow-x: hidden;
+    
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    transition: width var(--dur-norm) ease, background-color var(--dur-norm);
+    z-index: 10; 
+
+    /* Custom Scrollbar - Mac Style */
+    scrollbar-width: thin;
+    scrollbar-color: var(--slate-300) transparent;
+}
+
+.editor:hover {
+    scrollbar-color: var(--slate-400) transparent;
+}
+
+[data-theme="dark"] .editor {
+    box-shadow: 1px 0 0 0 rgba(255, 255, 255, 0.08);
+    scrollbar-color: var(--slate-600) transparent;
+}
+
+.editor::-webkit-scrollbar {
+    width: 6px;
+}
+
+.editor::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.editor::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 100vh;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.editor:hover::-webkit-scrollbar-thumb {
+    background-color: var(--slate-300);
+}
+
+[data-theme="dark"] .editor:hover::-webkit-scrollbar-thumb {
+    background-color: var(--slate-600);
+}
+
+/* ─── Preview Panel ─── */
+.preview {
+    flex: 1;
+    background: var(--color-bg-app);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 3rem 2rem;
+    
+    /* Fix: 'overlay' is deprecated. Use auto */
+    overflow-y: auto;
+    
+    overflow-x: hidden;
+    position: relative;
+    
+    /* Improved Dot Pattern */
+    background-image: radial-gradient(var(--slate-200) 1.5px, transparent 1.5px);
+    background-size: 20px 20px; 
+    perspective: 1000px;
+}
+
+[data-theme="dark"] .preview {
+    background-image: radial-gradient(rgba(255,255,255, 0.07) 1.5px, transparent 1.5px);
+}
+
+.spacer {
+    height: 80px; 
+    flex-shrink: 0;
+    width: 100%;
+}
+

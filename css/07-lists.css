@@ -1,0 +1,142 @@
+/* =============================================================================
+   7. DYNAMIC LIST ITEMS
+   ============================================================================= */
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 1rem;
+}
+
+.list-item {
+    background: var(--color-bg-input);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    position: relative;
+    /* Ensure transform context for smooth movement */
+    transform: translate3d(0, 0, 0); 
+    transition: box-shadow var(--dur-fast), border-color var(--dur-fast);
+}
+
+/* CRITICAL FIX: Styles for the item WHILE it is being dragged.
+   It must be fixed position to follow the mouse, with pointer-events: none
+   so the mouse can detect the 'placeholder' underneath it.
+*/
+.list-item.dragging {
+    position: fixed;
+    z-index: 9999; /* Above everything */
+    opacity: 0.95;
+    box-shadow: var(--shadow-xl);
+    background: var(--color-bg-panel);
+    border-color: var(--color-primary);
+    cursor: grabbing;
+    pointer-events: none; /* Critical: allows dragOver events on underlying list */
+    transform-origin: center center;
+    /* Width is set dynamically by JS to match original size */
+}
+
+.item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.item-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.item-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-mute);
+    font-size: 0.85rem;
+    transition: all var(--dur-fast);
+    cursor: grab;
+    /* Prevent button click from interfering with drag start */
+    touch-action: none; 
+}
+
+.item-btn:hover {
+    background: var(--color-bg-panel);
+    color: var(--color-text-main);
+    box-shadow: var(--shadow-sm);
+}
+
+.item-btn.delete:hover {
+    background: var(--red-50);
+    color: var(--color-danger);
+}
+
+[data-theme="dark"] .item-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.item-btn:active {
+    cursor: grabbing;
+}
+
+.item-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.item-input {
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: var(--text-sm);
+    transition: all var(--dur-fast);
+    color: var(--color-text-main);
+}
+
+.item-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-ring);
+}
+
+.item-input.full-width {
+    grid-column: 1 / -1;
+}
+
+.item-textarea {
+    grid-column: 1 / -1;
+    min-height: 60px;
+    resize: vertical;
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: var(--text-sm);
+    font-family: inherit;
+    line-height: 1.5;
+    transition: all var(--dur-fast);
+    color: var(--color-text-main);
+}
+
+.item-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-ring);
+}
+
+/* ─── Drag Placeholder ─── */
+.drag-placeholder {
+    background: var(--color-primary-sub);
+    border: 2px dashed var(--color-primary);
+    border-radius: var(--radius-md);
+    margin-bottom: 12px; /* Match gap */
+    transition: all 0.1s ease;
+    opacity: 0.5;
+}
+

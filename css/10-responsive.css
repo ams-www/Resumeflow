@@ -1,0 +1,190 @@
+/* =============================================================================
+   10. RESPONSIVE & PRINT STYLES
+   ============================================================================= */
+
+/* ─── Print Styles ─── */
+@media print {
+    /* Hide UI */
+    .header,
+    .editor,
+    .controls,
+    .view-switch,
+    .toast,
+    .btn-add,
+    .item-actions {
+        display: none !important;
+    }
+
+    /* Reset Page */
+    html,
+    body {
+        width: 210mm;
+        height: auto;
+        margin: 0;
+        padding: 0;
+        overflow: visible;
+        background: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
+    }
+
+    .workspace,
+    .preview {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        background: white !important;
+    }
+
+    .resume-paper {
+        width: 100% !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+    
+    .resume-paper * {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .resume-name {
+        font-size: 24pt !important;
+    }
+
+    .section-title i {
+        display: none !important;
+    }
+}
+
+/* ─── Mobile / Tablet ─── */
+@media (max-width: 1024px) {
+    :root {
+        --header-h: 56px;
+    }
+
+    body {
+        height: auto;
+        overflow-y: auto;
+    }
+
+    .header {
+        padding: 0 1rem;
+    }
+
+    .brand-text {
+        display: none;
+    }
+
+    .view-switch {
+        display: flex;
+    }
+
+    .icon-btn .btn-label {
+        display: none;
+    }
+
+    .icon-btn.primary {
+        width: 40px;
+        padding: 0;
+    }
+
+    .workspace {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+
+    .editor {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+        overflow: visible;
+        flex: none;
+    }
+
+    /* RESET GRID FOR MOBILE 
+       Force cards back to single column on narrow screens
+    */
+    .card {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .card > * {
+        grid-column: 1 / -1 !important;
+    }
+    
+    .form-group:has(input) {
+        grid-column: 1 / -1 !important;
+    }
+
+    .preview {
+        width: 100%;
+        overflow: visible;
+        padding: 0;
+        background: white;
+        background-image: none;
+    }
+
+    .resume-paper {
+        width: 100%;
+        min-height: auto;
+        padding: 24px;
+        box-shadow: none;
+        transform: none !important;
+    }
+
+    /* View Mode Switching */
+    body.mode-edit .preview {
+        display: none !important;
+    }
+
+    body.mode-preview .editor {
+        display: none !important;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 1025px) {
+    .view-switch {
+        display: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 0 0.75rem;
+    }
+
+    .controls {
+        gap: 4px;
+    }
+
+    .icon-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .editor {
+        padding: 1rem;
+    }
+
+    .card {
+        padding: 1.25rem;
+    }
+}
+

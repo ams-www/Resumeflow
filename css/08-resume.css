@@ -1,0 +1,263 @@
+/* =============================================================================
+   8. RESUME PREVIEW STYLES — PROFESSIONAL DUAL COLUMN
+   (Replaces 08-resume.css)
+   ============================================================================= */
+
+/* ---------- Scope & helpful defaults ---------- */
+.resume-paper {
+    width: var(--a4-w);
+    min-height: var(--a4-h);
+    max-width: calc(var(--a4-w) + 40px);
+    background: white;
+    padding: var(--a4-margin);
+    
+    /* ─── DUAL COLUMN MAGIC ─── */
+    /* This creates the "Double Side" / Newspaper layout */
+    column-count: 2;
+    column-gap: 2.5rem;
+    column-rule: 1px solid var(--slate-200); /* Vertical divider line */
+    
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+    border-radius: 6px;
+    
+    /* Typography Preserved (Large) */
+    font-family: var(--font-sans);
+    font-size: 17px; 
+    line-height: 1.5;
+    color: var(--slate-900);
+    
+    transform-origin: top center;
+    transition: transform var(--dur-norm);
+    animation: slideIn 0.6s var(--ease-out);
+    
+    /* Hyphenation improves look in narrow columns */
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    word-break: break-word;
+}
+
+/* ─── Resume Header (Spans Both Columns) ─── */
+.resume-header {
+    /* Critical: Makes header span the full width top */
+    column-span: all; 
+    -webkit-column-span: all;
+    
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--slate-300);
+    display: flex;
+    justify-content: space-between;
+    align-items: centre;
+    gap: 20px;
+}
+
+.resume-name {
+    font-family: var(--font-sans);
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.03em;
+    line-height: 0.8;
+    margin: 0 0 0 0;
+}
+
+.resume-role {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--res-accent);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* Compact Contact Info on the right of header */
+.resume-contact {
+    display: flex;
+    flex-direction: row;      /* ✅ one line */
+    flex-wrap: wrap;
+    row-gap: 6px;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;                /* spacing between items */
+    font-size: 1rem;
+    color: var(--slate-600);
+    font-weight: 500;
+}
+
+.contact-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap; /* prevents breaking email/phone */
+}
+
+.contact-item i {
+    color: var(--res-accent);
+    font-size: 1em;
+}
+
+.contact-item[style*="display: none"] {
+    display: none !important;
+}
+
+/* ─── Resume Sections (Flow into Columns) ─── */
+.resume-section {
+    /* Prevents a section from being chopped in half at bottom of column */
+    break-inside: auto;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    
+    display: inline-block; /* Maintains block integrity in columns */
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--slate-900);
+    margin: 0 0 12px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--slate-200);
+}
+
+.section-title i {
+    color: var(--res-accent);
+    font-size: 1em;
+}
+
+.section-text {
+    font-size: 1.05rem;
+    color: var(--slate-700);
+    line-height: 1.6;
+    text-align: left;
+}
+
+/* ─── Entries (Compact for Columns) ─── */
+.entries-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.resume-entry {
+    margin-bottom: 4px;
+    break-inside: avoid;
+}
+
+.entry-header {
+    display: flex;
+    flex-direction: column; /* Stack title/date in narrow columns */
+    margin-bottom: 4px;
+    border-left: 3px solid var(--slate-200);
+    padding-left: 10px;
+}
+
+.entry-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    line-height: 1.2;
+}
+
+.entry-subtitle {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--res-accent);
+    margin: 2px 0;
+}
+
+.entry-date {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--slate-500);
+    margin-top: 2px;
+}
+
+.entry-description {
+    font-size: 1.05rem;
+    color: var(--slate-600);
+    line-height: 1.5;
+    margin-top: 6px;
+    padding-left: 13px; /* Align with border */
+}
+
+/* ─── Skills (Compact Pills) ─── */
+.skills-group {
+    margin-bottom: 14px;
+}
+
+.skills-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.skills-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.skill-pill {
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    background: var(--color-black);
+    border-radius: 4px;
+    color: var(--color-white);
+}
+
+/* ─── Print Optimisations ─── */
+@media print {
+    .resume-paper {
+        width: 210mm;
+        height: auto; /* Allow auto height for columns */
+        min-height: 297mm;
+        margin: 0;
+        padding: 15mm; /* Slightly reduced margin for print */
+        box-shadow: none;
+        border-radius: 0;
+        
+        /* Force background graphics for pill colors */
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .resume-header {
+        border-bottom-width: 2px;
+    }
+    
+    /* Ensure columns work in print */
+    .resume-paper {
+        column-count: 2 !important;
+        column-gap: 20mm !important;
+    }
+}
+
+/* ─── Responsive (Preview Mode) ─── */
+@media (max-width: 800px) {
+    .resume-paper {
+        column-count: 1; /* Stack on mobile */
+        padding: 24px;
+    }
+    
+    .resume-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .resume-contact {
+        align-items: flex-start;
+        font-size: 0.9rem;
+    }
+}
+
+

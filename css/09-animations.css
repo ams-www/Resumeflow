@@ -1,0 +1,60 @@
+/* =============================================================================
+   9. ANIMATIONS & NOTIFICATIONS
+   ============================================================================= */
+
+/* ─── Toast Notifications ─── */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--slate-900);
+    color: white;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    box-shadow: var(--shadow-xl);
+    z-index: var(--z-modal);
+    opacity: 0;
+    transition: all var(--dur-norm) var(--ease-out);
+    pointer-events: none;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ─── Keyframes ─── */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+

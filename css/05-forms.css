@@ -1,0 +1,148 @@
+/* =============================================================================
+   5. FORM ELEMENTS
+   ============================================================================= */
+
+.form-group {
+    /* Margin handled by Grid gap in .card, but kept for fallback */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Remove legacy margins if inside a grid context (optional, but cleaner) */
+.card .form-group {
+    margin-bottom: 0;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.input-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.8rem; /* Slightly smaller, crisper */
+    font-weight: 600;
+    color: var(--color-text-body);
+    margin-bottom: 6px;
+    transition: color var(--dur-fast);
+}
+
+/* Highlight label when input is focused */
+.form-group:focus-within .input-label {
+    color: var(--color-primary);
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--color-bg-input);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    padding: 0 12px;
+    transition: all var(--dur-fast) var(--ease-out);
+    min-height: 42px; /* Taller touch targets */
+}
+
+/* Hover State */
+.input-wrapper:hover {
+    background: var(--color-bg-panel);
+    border-color: var(--color-border-hov);
+    box-shadow: var(--shadow-xs);
+}
+
+/* Focus State */
+.input-wrapper:focus-within {
+    background: var(--color-bg-panel);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-ring);
+    /* transform: translateY(-1px); <-- REMOVED to fix touch focus issues */
+}
+
+.input-wrapper i {
+    color: var(--color-text-mute);
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    transition: color var(--dur-fast);
+}
+
+.input-wrapper:focus-within i {
+    color: var(--color-primary);
+}
+
+.input-wrapper input,
+.input-wrapper textarea {
+    flex: 1;
+    padding: 10px 0;
+    background: transparent;
+    color: var(--color-text-main);
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.input-wrapper input::placeholder,
+.input-wrapper textarea::placeholder {
+    color: var(--slate-400);
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+/* Textarea Specifics */
+.textarea-wrap {
+    align-items: flex-start;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.textarea-wrap i {
+    margin-top: 3px;
+}
+
+.textarea-wrap textarea {
+    padding: 0;
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ─── Color Picker ─── */
+.color-picker-wrap {
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+}
+
+.color-picker-wrap:hover {
+    border-color: var(--color-border-hov);
+}
+
+.color-picker-wrap input[type="color"] {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.color-dot {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--res-accent);
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    transition: transform var(--dur-fast) var(--ease-elastic);
+}
+
+.color-picker-wrap:hover .color-dot {
+    transform: scale(1.2);
+}
+
