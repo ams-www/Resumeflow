@@ -2,79 +2,172 @@
  * =============================================================================
  * 4. STATE MANAGEMENT
  * =============================================================================
+ * High-performance state container with optimized history and persistence.
+ * Uses a subscriber pattern to orchestrate UI updates and structured deep merging
+ * to handle schema evolution.
  */
 
 class Store {
     constructor() {
+        /** @private */
+        this._listeners = new Set();
+        /** @private */
+        this._saveTimeout = null;
+        /** @private */
+        this._historyTimeout = null;
+
+        // Initialize state from storage or defaults
         this.state = this.loadState();
+        
+        // History Stack: Stores deep clones of state
         this.history = [Utils.clone(this.state)];
         this.historyIndex = 0;
-        this.listeners = new Set();
-        this.saveTimeout = null;
 
-        // Apply saved theme immediately
-        if(document.documentElement) {
-            document.documentElement.setAttribute('data-theme', this.state.settings.theme);
-            document.documentElement.style.setProperty('--resume-accent', this.state.settings.accentColor);
-        }
+        // Sync initial design tokens to CSS variables to prevent FOUC
+        this._applyDesignTokens();
     }
 
+    /**
+     * Returns the master blueprint for the resume data structure.
+     * @returns {Object}
+     */
     getDefaultState() {
         return {
             settings: { theme: 'light', accentColor: '#6366f1' },
             visibility: { exp: true, proj: true, edu: true },
-            personal: { name: '', role: '', email: '', phone: '', location: '', linkedin: '', website: '' },
+            personal: { 
+                name: '', role: '', email: '', phone: '', 
+                location: '', linkedin: '', website: '' 
+            },
             summary: '',
             skills: { tech: '', soft: '' },
             additional: { languages: '', hobbies: '' },
-            exp: [], proj: [], edu: []
+            exp: [], 
+            proj: [], 
+            edu: []
         };
     }
 
+    /**
+     * Fetches persisted data and ensures it complies with the current schema.
+     * @returns {Object}
+     */
     loadState() {
         try {
             const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
-            if (saved) return this.mergeWithDefaults(JSON.parse(saved));
-        } catch (e) { console.warn('Failed to load saved state:', e); }
+            if (saved) {
+                return this.mergeWithDefaults(JSON.parse(saved));
+            }
+        } catch (e) {
+            console.error('Store: Persistence load failure', e);
+        }
         return this.getDefaultState();
     }
 
+    /**
+     * Recursively merges saved data with the current default schema.
+     * Prevents runtime errors when new sections or fields are added to the app.
+     * @param {Object} saved 
+     * @returns {Object}
+     */
     mergeWithDefaults(saved) {
         const defaults = this.getDefaultState();
-        return {
-            settings: { ...defaults.settings, ...saved.settings },
-            visibility: { ...defaults.visibility, ...saved.visibility },
-            personal: { ...defaults.personal, ...saved.personal },
-            summary: saved.summary || defaults.summary,
-            skills: { ...defaults.skills, ...saved.skills },
-            additional: { ...defaults.additional, ...saved.additional },
-            exp: Array.isArray(saved.exp) ? saved.exp : [],
-            proj: Array.isArray(saved.proj) ? saved.proj : [],
-            edu: Array.isArray(saved.edu) ? saved.edu : []
-        };
+        if (!saved || typeof saved !== 'object') return defaults;
+
+        const merged = { ...defaults };
+
+        // Helper for shallow-nested objects (settings, visibility, personal, skills, additional)
+        const categories = ['settings', 'visibility', 'personal', 'skills', 'additional'];
+        categories.forEach(cat => {
+            if (saved[cat] && typeof saved[cat] === 'object') {
+                merged[cat] = { ...defaults[cat], ...saved[cat] };
+            }
+        });
+
+        // Handle direct string properties
+        merged.summary = typeof saved.summary === 'string' ? saved.summary : defaults.summary;
+
+        // Handle dynamic arrays (exp, proj, edu)
+        const arrays = ['exp', 'proj', 'edu'];
+        arrays.forEach(arr => {
+            merged[arr] = Array.isArray(saved[arr]) ? saved[arr] : [];
+        });
+
+        return merged;
     }
 
+    /**
+     * Synchronizes the design system with the DOM via CSS custom properties.
+     * @private
+     */
+    _applyDesignTokens() {
+        const doc = document.documentElement;
+        if (!doc) return;
+        
+        const { theme, accentColor } = this.state.settings;
+        doc.setAttribute('data-theme', theme);
+        doc.style.setProperty('--resume-accent', accentColor);
+    }
+
+    /**
+     * Persists current state to LocalStorage with debouncing.
+     */
     saveState() {
-        clearTimeout(this.saveTimeout);
-        this.saveTimeout = setTimeout(() => {
+        if (this._saveTimeout) clearTimeout(this._saveTimeout);
+        this._saveTimeout = setTimeout(() => {
             try {
                 localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.state));
-            } catch (e) { console.warn('Failed to save state:', e); }
+            } catch (e) {
+                console.error('Store: Persistence save failure', e);
+            }
         }, CONFIG.SAVE_DELAY);
     }
 
-    update(updater) {
+    /**
+     * Core mutation method.
+     * @param {Function} updater - Function that receives state and modifies it.
+     * @param {boolean} isTyping - If true, history snapshots are debounced to prevent overhead.
+     */
+    update(updater, isTyping = false) {
         updater(this.state);
-        this.pushHistory();
+
+        // Apply visual settings changes immediately (before render)
+        this._applyDesignTokens();
+
+        if (!isTyping) {
+            this.pushHistory();
+        } else {
+            // Group rapid typing events into a single history entry
+            if (this._historyTimeout) clearTimeout(this._historyTimeout);
+            this._historyTimeout = setTimeout(() => {
+                this.pushHistory();
+            }, CONFIG.HISTORY_DEBOUNCE);
+        }
+
         this.saveState();
         this.notify();
     }
 
+    /**
+     * Captures a deep snapshot of the current state for the undo/redo stack.
+     */
     pushHistory() {
+        // Truncate redo stack if new change happens after undo
         if (this.historyIndex < this.history.length - 1) {
             this.history = this.history.slice(0, this.historyIndex + 1);
         }
-        this.history.push(Utils.clone(this.state));
+
+        const snapshot = Utils.clone(this.state);
+        
+        // Performance: Skip snapshot if state is effectively unchanged
+        const lastSnapshot = this.history[this.historyIndex];
+        if (JSON.stringify(lastSnapshot) === JSON.stringify(snapshot)) {
+            return;
+        }
+
+        this.history.push(snapshot);
+        
+        // Enforce maximum buffer size
         if (this.history.length > CONFIG.MAX_HISTORY) {
             this.history.shift();
         } else {
@@ -82,10 +175,15 @@ class Store {
         }
     }
 
+    /**
+     * Reverts to the previous state snapshot.
+     * @returns {boolean} Success status.
+     */
     undo() {
         if (this.historyIndex > 0) {
             this.historyIndex--;
             this.state = Utils.clone(this.history[this.historyIndex]);
+            this._applyDesignTokens();
             this.saveState();
             this.notify();
             return true;
@@ -93,10 +191,15 @@ class Store {
         return false;
     }
 
+    /**
+     * Moves forward in the history stack.
+     * @returns {boolean} Success status.
+     */
     redo() {
         if (this.historyIndex < this.history.length - 1) {
             this.historyIndex++;
             this.state = Utils.clone(this.history[this.historyIndex]);
+            this._applyDesignTokens();
             this.saveState();
             this.notify();
             return true;
@@ -104,22 +207,40 @@ class Store {
         return false;
     }
 
+    /**
+     * Pub/Sub: Add a function to be called on state change.
+     * @param {Function} listener 
+     * @returns {Function} Unsubscribe function.
+     */
     subscribe(listener) {
-        this.listeners.add(listener);
-        return () => this.listeners.delete(listener);
+        this._listeners.add(listener);
+        return () => this._listeners.delete(listener);
     }
 
+    /**
+     * Notifies all subscribers of a state change.
+     */
     notify() {
-        this.listeners.forEach(listener => listener(this.state));
+        this._listeners.forEach(listener => listener(this.state));
     }
 
+    /**
+     * Replaces current state with external data.
+     * @param {Object} data 
+     */
     importState(data) {
         this.state = this.mergeWithDefaults(data);
-        this.pushHistory();
+        this.history = [Utils.clone(this.state)];
+        this.historyIndex = 0;
+        this._applyDesignTokens();
         this.saveState();
         this.notify();
     }
 
+    /**
+     * Returns a JSON representation of the current state.
+     * @returns {string}
+     */
     exportState() {
         return JSON.stringify(this.state, null, 2);
     }

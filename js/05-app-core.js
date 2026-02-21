@@ -1,98 +1,167 @@
+'use strict';
+
 /**
  * =============================================================================
  * 5. MAIN APP CORE
  * =============================================================================
+ * The central orchestrator for the ResumeFlow application.
+ * This class initializes the state store, manages DOM references, and
+ * coordinates the lifecycle of the application.
+ * * Note: Functional modules (rendering, handlers, I/O) are attached to this 
+ * class prototype in subsequent files.
  */
 
 class ResumeApp {
+    /**
+     * Initializes the application instance.
+     */
     constructor() {
+        /** @type {Store} Primary state management container */
         this.store = new Store();
+
+        /** @type {Object|null} State tracker for active drag-and-drop operations */
         this.dragState = null;
-        this.init();
+
+        /** @type {Object} Cached DOM element references */
+        this.elements = {};
+
+        // Execute core initialization
+        this._init();
     }
 
-    init() {
-        this.cacheElements();
-        this.bindEvents();
-        this.render();
+    /**
+     * Internal lifecycle orchestrator.
+     * @private
+     */
+    _init() {
+        try {
+            this.cacheElements();
+            
+            // Only proceed if core UI components are found
+            if (!this.elements.resumePaper) {
+                console.error('ResumeApp: Critical UI components missing from DOM.');
+                return;
+            }
 
-        // Subscribe to state changes
-        this.store.subscribe(() => this.render());
+            // Bind interactions (defined in 10-bootstrap.js)
+            if (typeof this.bindEvents === 'function') {
+                this.bindEvents();
+            }
 
-        // Initial preview scaling
-        this.scalePreview();
+            // Initial UI sync
+            this.render();
+
+            // Establish reactive link: UI re-renders on state mutation
+            this.store.subscribe(() => {
+                requestAnimationFrame(() => this.render());
+            });
+
+            // Handle initial viewport geometry
+            this._handleInitialLayout();
+            
+        } catch (error) {
+            console.error('ResumeApp: Initialization failed:', error);
+        }
     }
 
+    /**
+     * Ensures the preview is correctly scaled on first load.
+     * @private
+     */
+    _handleInitialLayout() {
+        // Delay scaling slightly to allow browser layout engine to settle
+        window.addEventListener('load', () => {
+            if (typeof this.scalePreview === 'function') {
+                this.scalePreview();
+            }
+        }, { once: true });
+    }
+
+    /**
+     * Performance Optimization: Traverses the DOM once and caches references.
+     * Prevents expensive repetitive document.getElementById calls.
+     */
     cacheElements() {
+        /**
+         * Utility to safely retrieve elements.
+         * @param {string} id 
+         * @returns {HTMLElement|null}
+         */
+        const get = (id) => document.getElementById(id);
+        const query = (selector) => document.querySelector(selector);
+        const all = (selector) => document.querySelectorAll(selector);
+
         this.elements = {
-            // Header controls
-            btnImport: document.getElementById('btn-import'),
-            btnExport: document.getElementById('btn-export'),
-            btnTheme: document.getElementById('btn-theme'),
-            btnPrint: document.getElementById('btn-print'),
-            colorPicker: document.getElementById('color-picker'),
-            colorDot: document.querySelector('.color-dot'),
-            fileInput: document.getElementById('file-input'),
-            viewBtns: document.querySelectorAll('.view-btn'),
+            // Header & Global Navigation
+            btnImport:      get('btn-import'),
+            btnExport:      get('btn-export'),
+            btnTheme:       get('btn-theme'),
+            btnPrint:       get('btn-print'),
+            colorPicker:    get('color-picker'),
+            colorDot:       query('.color-dot'),
+            fileInput:      get('file-input'),
+            viewBtns:       all('.view-btn'),
 
-            // Toggles & Inputs
-            toggleExp: document.getElementById('toggle-exp'),
-            toggleProj: document.getElementById('toggle-proj'),
-            toggleEdu: document.getElementById('toggle-edu'),
+            // Section Visibility Toggles
+            toggleExp:      get('toggle-exp'),
+            toggleProj:     get('toggle-proj'),
+            toggleEdu:      get('toggle-edu'),
 
-            // Personal Inputs
-            inName: document.getElementById('in-name'),
-            inRole: document.getElementById('in-role'),
-            inEmail: document.getElementById('in-email'),
-            inPhone: document.getElementById('in-phone'),
-            inLocation: document.getElementById('in-location'),
-            inLinkedin: document.getElementById('in-linkedin'),
-            inWebsite: document.getElementById('in-website'),
-            inSummary: document.getElementById('in-summary'),
+            // Form Inputs: Identity
+            inName:         get('in-name'),
+            inRole:         get('in-role'),
+            inEmail:        get('in-email'),
+            inPhone:        get('in-phone'),
+            inLocation:     get('in-location'),
+            inLinkedin:     get('in-linkedin'),
+            inWebsite:      get('in-website'),
+            inSummary:      get('in-summary'),
 
-            // Skills & Additional Inputs
-            inSkillsTech: document.getElementById('in-skills-tech'),
-            inSkillsSoft: document.getElementById('in-skills-soft'),
-            inLanguages: document.getElementById('in-languages'),
-            inHobbies: document.getElementById('in-hobbies'),
+            // Form Inputs: Skills & Metadata
+            inSkillsTech:   get('in-skills-tech'),
+            inSkillsSoft:   get('in-skills-soft'),
+            inLanguages:    get('in-languages'),
+            inHobbies:      get('in-hobbies'),
 
-            // Lists
-            listExp: document.getElementById('list-exp'),
-            listProj: document.getElementById('list-proj'),
-            listEdu: document.getElementById('list-edu'),
-            btnAddItems: document.querySelectorAll('.btn-add'),
+            // Dynamic Editor Lists
+            listExp:        get('list-exp'),
+            listProj:       get('list-proj'),
+            listEdu:        get('list-edu'),
+            btnAddItems:    all('.btn-add'),
 
-            // Preview Outputs
-            outName: document.getElementById('out-name'),
-            outRole: document.getElementById('out-role'),
-            outEmail: document.getElementById('out-email'),
-            outPhone: document.getElementById('out-phone'),
-            outLocation: document.getElementById('out-location'),
-            outLinkedin: document.getElementById('out-linkedin'),
-            outWebsite: document.getElementById('out-website'),
-            outSummary: document.getElementById('out-summary'),
-            outSkillsTech: document.getElementById('out-skills-tech'),
-            outSkillsSoft: document.getElementById('out-skills-soft'),
-            outLanguages: document.getElementById('out-languages'),
-            outHobbies: document.getElementById('out-hobbies'),
-            outExp: document.getElementById('out-exp'),
-            outProj: document.getElementById('out-proj'),
-            outEdu: document.getElementById('out-edu'),
+            // Preview Panel Outputs
+            outName:        get('out-name'),
+            outRole:        get('out-role'),
+            outEmail:       get('out-email'),
+            outPhone:       get('out-phone'),
+            outLocation:    get('out-location'),
+            outLinkedin:    get('out-linkedin'),
+            outWebsite:     get('out-website'),
+            outSummary:     get('out-summary'),
+            outSkillsTech:  get('out-skills-tech'),
+            outSkillsSoft:  get('out-skills-soft'),
+            outLanguages:   get('out-languages'),
+            outHobbies:     get('out-hobbies'),
+            outExp:         get('out-exp'),
+            outProj:        get('out-proj'),
+            outEdu:         get('out-edu'),
 
-            // Contact Wrappers & Sections
-            wrapEmail: document.getElementById('wrap-email'),
-            wrapPhone: document.getElementById('wrap-phone'),
-            wrapLocation: document.getElementById('wrap-location'),
-            wrapLinkedin: document.getElementById('wrap-linkedin'),
-            wrapWebsite: document.getElementById('wrap-website'),
-            sectionExp: document.getElementById('section-exp'),
-            sectionProj: document.getElementById('section-proj'),
-            sectionEdu: document.getElementById('section-edu'),
+            // Layout Wrappers
+            wrapEmail:      get('wrap-email'),
+            wrapPhone:      get('wrap-phone'),
+            wrapLocation:   get('wrap-location'),
+            wrapLinkedin:   get('wrap-linkedin'),
+            wrapWebsite:    get('wrap-website'),
+            
+            // Resume Paper Sections
+            sectionExp:     get('section-exp'),
+            sectionProj:    get('section-proj'),
+            sectionEdu:     get('section-edu'),
 
-            // Containers
-            preview: document.querySelector('.preview'),
-            resumePaper: document.getElementById('resume-paper'),
-            toast: document.getElementById('toast')
+            // System Containers
+            preview:        query('.preview'),
+            resumePaper:    get('resume-paper'),
+            toast:          get('toast')
         };
     }
 }
