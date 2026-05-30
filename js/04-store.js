@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * =============================================================================
  * 4. STATE MANAGEMENT
@@ -7,20 +9,24 @@
  * to handle schema evolution.
  */
 
+// OPTIMIZATION: hoisted to module level so mergeWithDefaults never re-allocates them.
+const _MERGE_CATEGORIES = Object.freeze(['settings', 'visibility', 'personal', 'skills', 'additional']);
+const _MERGE_ARRAYS      = Object.freeze(['exp', 'proj', 'edu']);
+
 class Store {
     constructor() {
         /** @private */
-        this._listeners = new Set();
+        this._listeners     = new Set();
         /** @private */
-        this._saveTimeout = null;
+        this._saveTimeout   = null;
         /** @private */
         this._historyTimeout = null;
 
         // Initialize state from storage or defaults
         this.state = this.loadState();
-        
-        // History Stack: Stores deep clones of state
-        this.history = [Utils.clone(this.state)];
+
+        // History stack: stores deep clones of state snapshots
+        this.history      = [Utils.clone(this.state)];
         this.historyIndex = 0;
 
         // Sync initial design tokens to CSS variables to prevent FOUC
@@ -33,18 +39,15 @@ class Store {
      */
     getDefaultState() {
         return {
-            settings: { theme: 'light', accentColor: '#6366f1' },
+            settings:   { theme: 'light', accentColor: '#6366f1' },
             visibility: { exp: true, proj: true, edu: true },
-            personal: { 
-                name: '', role: '', email: '', phone: '', 
-                location: '', linkedin: '', website: '' 
-            },
-            summary: '',
-            skills: { tech: '', soft: '' },
+            personal:   { name: '', role: '', email: '', phone: '', location: '', linkedin: '', website: '' },
+            summary:    '',
+            skills:     { tech: '', soft: '' },
             additional: { languages: '', hobbies: '' },
-            exp: [], 
-            proj: [], 
-            edu: []
+            exp:  [],
+            proj: [],
+            edu:  []
         };
     }
 
@@ -55,9 +58,7 @@ class Store {
     loadState() {
         try {
             const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
-            if (saved) {
-                return this.mergeWithDefaults(JSON.parse(saved));
-            }
+            if (saved) return this.mergeWithDefaults(JSON.parse(saved));
         } catch (e) {
             console.error('Store: Persistence load failure', e);
         }
@@ -67,7 +68,7 @@ class Store {
     /**
      * Recursively merges saved data with the current default schema.
      * Prevents runtime errors when new sections or fields are added to the app.
-     * @param {Object} saved 
+     * @param {Object} saved
      * @returns {Object}
      */
     mergeWithDefaults(saved) {
@@ -76,20 +77,15 @@ class Store {
 
         const merged = { ...defaults };
 
-        // Helper for shallow-nested objects (settings, visibility, personal, skills, additional)
-        const categories = ['settings', 'visibility', 'personal', 'skills', 'additional'];
-        categories.forEach(cat => {
+        _MERGE_CATEGORIES.forEach(cat => {
             if (saved[cat] && typeof saved[cat] === 'object') {
                 merged[cat] = { ...defaults[cat], ...saved[cat] };
             }
         });
 
-        // Handle direct string properties
         merged.summary = typeof saved.summary === 'string' ? saved.summary : defaults.summary;
 
-        // Handle dynamic arrays (exp, proj, edu)
-        const arrays = ['exp', 'proj', 'edu'];
-        arrays.forEach(arr => {
+        _MERGE_ARRAYS.forEach(arr => {
             merged[arr] = Array.isArray(saved[arr]) ? saved[arr] : [];
         });
 
@@ -103,14 +99,13 @@ class Store {
     _applyDesignTokens() {
         const doc = document.documentElement;
         if (!doc) return;
-        
         const { theme, accentColor } = this.state.settings;
         doc.setAttribute('data-theme', theme);
         doc.style.setProperty('--resume-accent', accentColor);
     }
 
     /**
-     * Persists current state to LocalStorage with debouncing.
+     * Persists current state to localStorage with debouncing.
      */
     saveState() {
         if (this._saveTimeout) clearTimeout(this._saveTimeout);
@@ -125,8 +120,8 @@ class Store {
 
     /**
      * Core mutation method.
-     * @param {Function} updater - Function that receives state and modifies it.
-     * @param {boolean} isTyping - If true, history snapshots are debounced to prevent overhead.
+     * @param {Function} updater  - Function that receives state and modifies it.
+     * @param {boolean}  isTyping - If true, history snapshots are debounced to prevent overhead.
      */
     update(updater, isTyping = false) {
         updater(this.state);
@@ -139,9 +134,7 @@ class Store {
         } else {
             // Group rapid typing events into a single history entry
             if (this._historyTimeout) clearTimeout(this._historyTimeout);
-            this._historyTimeout = setTimeout(() => {
-                this.pushHistory();
-            }, CONFIG.HISTORY_DEBOUNCE);
+            this._historyTimeout = setTimeout(() => this.pushHistory(), CONFIG.HISTORY_DEBOUNCE);
         }
 
         this.saveState();
@@ -152,24 +145,24 @@ class Store {
      * Captures a deep snapshot of the current state for the undo/redo stack.
      */
     pushHistory() {
-        // Truncate redo stack if new change happens after undo
+        // Truncate redo stack if a new change happens after undo
         if (this.historyIndex < this.history.length - 1) {
             this.history = this.history.slice(0, this.historyIndex + 1);
         }
 
-        const snapshot = Utils.clone(this.state);
-        
-        // Performance: Skip snapshot if state is effectively unchanged
+        const snapshot     = Utils.clone(this.state);
         const lastSnapshot = this.history[this.historyIndex];
-        if (JSON.stringify(lastSnapshot) === JSON.stringify(snapshot)) {
-            return;
-        }
+
+        // Skip snapshot if state is effectively unchanged
+        if (JSON.stringify(lastSnapshot) === JSON.stringify(snapshot)) return;
 
         this.history.push(snapshot);
-        
+
         // Enforce maximum buffer size
         if (this.history.length > CONFIG.MAX_HISTORY) {
             this.history.shift();
+            // historyIndex stays the same: items shifted down by one so index
+            // still points to the last entry after shift+push balance out.
         } else {
             this.historyIndex++;
         }
@@ -208,8 +201,8 @@ class Store {
     }
 
     /**
-     * Pub/Sub: Add a function to be called on state change.
-     * @param {Function} listener 
+     * Pub/Sub: adds a function to be called on state change.
+     * @param {Function} listener
      * @returns {Function} Unsubscribe function.
      */
     subscribe(listener) {
@@ -226,11 +219,11 @@ class Store {
 
     /**
      * Replaces current state with external data.
-     * @param {Object} data 
+     * @param {Object} data
      */
     importState(data) {
-        this.state = this.mergeWithDefaults(data);
-        this.history = [Utils.clone(this.state)];
+        this.state        = this.mergeWithDefaults(data);
+        this.history      = [Utils.clone(this.state)];
         this.historyIndex = 0;
         this._applyDesignTokens();
         this.saveState();
@@ -245,4 +238,3 @@ class Store {
         return JSON.stringify(this.state, null, 2);
     }
 }
-

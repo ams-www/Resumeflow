@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * =============================================================================
  * 2. UTILITIES
@@ -30,9 +32,9 @@ const Utils = Object.freeze({
     },
 
     /**
-     * High-performance HTML escaping using regex.
+     * High-performance HTML escaping using a static entity map.
      * Approximately 10-20x faster than creating temporary DOM elements.
-     * @param {string} str 
+     * @param {string} str
      * @returns {string}
      */
     escapeHtml(str) {
@@ -43,7 +45,7 @@ const Utils = Object.freeze({
     /**
      * Formats plain text into safe HTML, supporting basic markdown and line breaks.
      * Processes escaping and formatting in a single pass to minimize string allocations.
-     * @param {string} str 
+     * @param {string} str
      * @returns {string}
      */
     formatText(str) {
@@ -55,57 +57,52 @@ const Utils = Object.freeze({
     },
 
     /**
-     * Deep clones an object using structuredClone (modern) with a fallback.
-     * Fallback is optimized for the plain-object state used in this application.
-     * @param {any} obj 
+     * Deep clones an object using structuredClone (modern) with a JSON fallback.
+     * @param {any} obj
      * @returns {any}
      */
     clone(obj) {
         if (obj === null || typeof obj !== 'object') return obj;
-
         try {
-            if (typeof structuredClone === 'function') {
-                return structuredClone(obj);
-            }
+            return structuredClone(obj);
         } catch (e) {
-            // Fallback for older browsers or specific environments
             return JSON.parse(JSON.stringify(obj));
         }
-        
-        return JSON.parse(JSON.stringify(obj));
     },
 
     /**
      * Debounces a function to prevent excessive calls during rapid events
      * like typing or window resizing.
-     * @param {Function} fn 
-     * @param {number} delay 
+     * BUG FIX: was `fn.apply(this, args)` which bound Utils as `this` instead of
+     * the caller's context. Now uses `fn(...args)` for correct behaviour.
+     * @param {Function} fn
+     * @param {number} delay
      * @returns {Function}
      */
     debounce(fn, delay) {
         let timeoutId;
         return (...args) => {
             clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => fn.apply(this, args), delay);
+            timeoutId = setTimeout(() => fn(...args), delay);
         };
     },
 
     /**
-     * Throttles a function to ensure it is called at most once per specified interval.
+     * Throttles a function to ensure it is called at most once per interval.
      * Ideal for high-frequency events like pointermove or scroll.
-     * @param {Function} fn 
-     * @param {number} limit 
+     * BUG FIX: same wrong-`this` fix as debounce.
+     * @param {Function} fn
+     * @param {number} limit
      * @returns {Function}
      */
     throttle(fn, limit) {
         let inThrottle;
         return (...args) => {
             if (!inThrottle) {
-                fn.apply(this, args);
+                fn(...args);
                 inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
+                setTimeout(() => { inThrottle = false; }, limit);
             }
         };
     }
 });
-

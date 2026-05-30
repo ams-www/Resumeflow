@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * =============================================================================
  * 10. BOOTSTRAP & EVENTS
@@ -20,9 +22,9 @@ Object.assign(ResumeApp.prototype, {
         elements.btnImport?.addEventListener('click', () => elements.fileInput?.click());
         elements.fileInput?.addEventListener('change', (e) => this.handleImport(e));
         elements.btnExport?.addEventListener('click', () => this.handleExport());
-        elements.btnTheme?.addEventListener('click', () => this.toggleTheme());
-        elements.btnPrint?.addEventListener('click', () => window.print());
-        
+        elements.btnTheme?.addEventListener('click',  () => this.toggleTheme());
+        elements.btnPrint?.addEventListener('click',  () => window.print());
+
         elements.colorPicker?.addEventListener('input', (e) => this.handleColorChange(e), { passive: true });
 
         // --- 2. Responsive View Orchestration ---
@@ -40,35 +42,33 @@ Object.assign(ResumeApp.prototype, {
         });
 
         // --- 4. Unified Form Interaction (Editor) ---
-        // Mapping elements to their state paths for clean synchronization
+        // Each binding maps a DOM element to its dot-notation state path.
+        // BUG FIX: removed the redundant `root` flag — the path traversal loop handles
+        // single-segment paths (e.g. 'summary') correctly without special-casing.
         const inputBindings = [
-            { el: elements.inName, path: 'personal.name' },
-            { el: elements.inRole, path: 'personal.role' },
-            { el: elements.inEmail, path: 'personal.email' },
-            { el: elements.inPhone, path: 'personal.phone' },
-            { el: elements.inLocation, path: 'personal.location' },
-            { el: elements.inLinkedin, path: 'personal.linkedin' },
-            { el: elements.inWebsite, path: 'personal.website' },
-            { el: elements.inSummary, path: 'summary', root: true },
+            { el: elements.inName,       path: 'personal.name' },
+            { el: elements.inRole,       path: 'personal.role' },
+            { el: elements.inEmail,      path: 'personal.email' },
+            { el: elements.inPhone,      path: 'personal.phone' },
+            { el: elements.inLocation,   path: 'personal.location' },
+            { el: elements.inLinkedin,   path: 'personal.linkedin' },
+            { el: elements.inWebsite,    path: 'personal.website' },
+            { el: elements.inSummary,    path: 'summary' },
             { el: elements.inSkillsTech, path: 'skills.tech' },
             { el: elements.inSkillsSoft, path: 'skills.soft' },
-            { el: elements.inLanguages, path: 'additional.languages' },
-            { el: elements.inHobbies, path: 'additional.hobbies' }
+            { el: elements.inLanguages,  path: 'additional.languages' },
+            { el: elements.inHobbies,    path: 'additional.hobbies' }
         ];
 
-        inputBindings.forEach(({ el, path, root }) => {
+        inputBindings.forEach(({ el, path }) => {
             if (!el) return;
+            const keys = path.split('.');
             el.addEventListener('input', () => {
                 store.update(s => {
-                    if (root) {
-                        s[path] = el.value;
-                    } else {
-                        const keys = path.split('.');
-                        let current = s;
-                        for (let i = 0; i < keys.length - 1; i++) current = current[keys[i]];
-                        current[keys[keys.length - 1]] = el.value;
-                    }
-                }, true); // Silent update (typing mode)
+                    let current = s;
+                    for (let i = 0; i < keys.length - 1; i++) current = current[keys[i]];
+                    current[keys[keys.length - 1]] = el.value;
+                }, true); // isTyping = true (debounced history)
             });
         });
 
@@ -77,12 +77,12 @@ Object.assign(ResumeApp.prototype, {
             btn.addEventListener('click', () => {
                 const type = btn.getAttribute('data-type');
                 if (!type) return;
-                
+
                 this.addItem(type);
 
-                // Accessibility: Auto-focus the primary field of the new entry
+                // Accessibility: auto-focus the primary field of the new entry
                 requestAnimationFrame(() => {
-                    const listKey = `list${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                    const listKey    = `list${type.charAt(0).toUpperCase() + type.slice(1)}`;
                     const firstInput = elements[listKey]?.lastElementChild?.querySelector('input');
                     firstInput?.focus();
                 });
@@ -93,9 +93,9 @@ Object.assign(ResumeApp.prototype, {
             const listEl = elements[`list${type.charAt(0).toUpperCase() + type.slice(1)}`];
             if (!listEl) return;
 
-            // Delegation: Handle typing and deletion within dynamic lists
+            // Delegation: handle typing within dynamic list fields
             listEl.addEventListener('input', (e) => {
-                const field = e.target.getAttribute('data-field');
+                const field  = e.target.getAttribute('data-field');
                 const itemEl = e.target.closest('.list-item');
                 if (!field || !itemEl) return;
 
@@ -107,6 +107,7 @@ Object.assign(ResumeApp.prototype, {
                 }, true);
             });
 
+            // Delegation: handle delete button clicks
             listEl.addEventListener('click', (e) => {
                 const deleteBtn = e.target.closest('[data-action="delete"]');
                 if (deleteBtn) {
@@ -118,29 +119,28 @@ Object.assign(ResumeApp.prototype, {
                 }
             });
 
-            // Reorder Trigger
+            // Reorder trigger
             listEl.addEventListener('pointerdown', (e) => this.handleDragStart(e, type));
         });
 
         // --- 6. Global Drag & Drop Tracking ---
-        document.addEventListener('pointermove', (e) => this.handleDragMove(e));
-        document.addEventListener('pointerup', (e) => this.handleDragEnd(e));
+        // BUG FIX: pointermove marked passive — handleDragMove never calls
+        // preventDefault, so the passive flag is correct and avoids blocking scroll.
+        document.addEventListener('pointermove',   (e) => this.handleDragMove(e), { passive: true });
+        document.addEventListener('pointerup',     (e) => this.handleDragEnd(e));
         document.addEventListener('pointercancel', (e) => this.handleDragEnd(e));
 
-        // --- 7. Power User Controls (Keyboard Shortcuts) ---
+        // --- 7. Keyboard Shortcuts (Undo / Redo) ---
         document.addEventListener('keydown', (e) => {
-            const isZ = e.key.toLowerCase() === 'z';
-            const isY = e.key.toLowerCase() === 'y';
             const isMod = e.ctrlKey || e.metaKey;
+            if (!isMod) return;
 
-            if (isMod && isZ) {
+            const key = e.key.toLowerCase();
+            if (key === 'z') {
                 e.preventDefault();
-                if (e.shiftKey) {
-                    if (store.redo()) this.showToast('Redo successful');
-                } else {
-                    if (store.undo()) this.showToast('Undo successful');
-                }
-            } else if (isMod && isY) {
+                const success = e.shiftKey ? store.redo() : store.undo();
+                if (success) this.showToast(e.shiftKey ? 'Redo successful' : 'Undo successful');
+            } else if (key === 'y') {
                 e.preventDefault();
                 if (store.redo()) this.showToast('Redo successful');
             }
@@ -148,16 +148,11 @@ Object.assign(ResumeApp.prototype, {
 
         // --- 8. Viewport & Geometry Synchronization ---
         if (elements.preview && window.ResizeObserver) {
-            const previewObserver = new ResizeObserver(Utils.throttle(() => {
-                this.scalePreview();
-            }, 50));
+            const previewObserver = new ResizeObserver(Utils.throttle(() => this.scalePreview(), 50));
             previewObserver.observe(elements.preview);
         }
 
-        // Handle print lifecycle to ensure layout resets correctly
         window.addEventListener('afterprint', () => this.scalePreview());
-        
-        // Handle orientation changes and window resizing
         window.addEventListener('resize', Utils.debounce(() => this.scalePreview(), 150));
     }
 });
@@ -179,4 +174,3 @@ Object.assign(ResumeApp.prototype, {
         bootstrap();
     }
 })();
-

@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * =============================================================================
  * 7. APP HANDLERS
@@ -16,10 +18,10 @@ Object.assign(ResumeApp.prototype, {
 
         this.store.update(s => {
             s[type].push({
-                id: Utils.uid(),
-                title: '',
-                subtitle: '',
-                date: '',
+                id:          Utils.uid(),
+                title:       '',
+                subtitle:    '',
+                date:        '',
                 description: ''
             });
         });
@@ -30,16 +32,13 @@ Object.assign(ResumeApp.prototype, {
 
     /**
      * Removes an entry from a dynamic section.
-     * Note: Native confirm() is used as a safety fallback; in a production 
-     * environment with custom UI, this would be replaced by a non-blocking modal.
-     * @param {string} type - The section identifier.
+     * @param {string} type  - The section identifier.
      * @param {number} index - Array index to remove.
      */
     deleteItem(type, index) {
         const items = this.store.state[type];
         if (!items || !items[index]) return;
 
-        // Perform mutation via store
         this.store.update(s => {
             if (s[type]) s[type].splice(index, 1);
         });
@@ -64,8 +63,7 @@ Object.assign(ResumeApp.prototype, {
      */
     toggleTheme() {
         this.store.update(s => {
-            const current = s.settings.theme;
-            s.settings.theme = current === 'light' ? 'dark' : 'light';
+            s.settings.theme = s.settings.theme === 'light' ? 'dark' : 'light';
         });
 
         const isDark = this.store.state.settings.theme === 'dark';
@@ -92,10 +90,10 @@ Object.assign(ResumeApp.prototype, {
     switchView(mode) {
         if (!mode) return;
 
-        // 1. Update Body state for CSS-based layout shifts
+        // 1. Update body state for CSS-based layout shifts
         document.body.className = `mode-${mode}`;
 
-        // 2. Synchronize Tab/Button accessibility and active states
+        // 2. Synchronize tab/button accessibility and active states
         if (this.elements.viewBtns) {
             this.elements.viewBtns.forEach(btn => {
                 const isActive = btn.dataset.view === mode;
@@ -104,9 +102,8 @@ Object.assign(ResumeApp.prototype, {
             });
         }
 
-        // 3. UX: If switching to preview, ensure scaling is recalculated
+        // 3. If switching to preview, recalculate scaling after CSS transitions settle
         if (mode === 'preview') {
-            // Use requestAnimationFrame to wait for CSS layout transitions
             requestAnimationFrame(() => {
                 if (typeof this.scalePreview === 'function') {
                     this.scalePreview();
@@ -115,4 +112,3 @@ Object.assign(ResumeApp.prototype, {
         }
     }
 });
-
